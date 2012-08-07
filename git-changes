@@ -26,7 +26,7 @@ REMOTE_NAME=`cat $GIT_CONFIG | grep --after-context=2 'branch "'$CURRENT_BRANCH 
 TRACK=$REMOTE_NAME/$REMOTE_BRANCH
 
 # generate output
-echo "Files changes relative to ${TRACK}:" > $TMP_DIR$TMP_FILE
+echo "File changes relative to ${TRACK}:" > $TMP_DIR$TMP_FILE
 git diff $TRACK...$CURRENT_BRANCH --name-status >> $TMP_DIR$TMP_FILE
 
 # render the output
