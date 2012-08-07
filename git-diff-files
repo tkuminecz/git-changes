@@ -1,2 +1,37 @@
 #!/bin/bash
 
+# save original working dir
+OLD_PWD=`pwd`
+
+# create temp directory
+TMP_DIR="/home/${USER}/.tmp/"
+TMP_FILE="git-df.output"
+mkdir -p $TMP_DIR
+
+# determine current branch
+if [ $1 ]
+then
+	CURRENT_BRANCH=$1
+else
+	CURRENT_BRANCH=`git branch | grep '*' | cut --delimiter=* -f 2 | cut -c 2-`
+fi
+
+# determine tracking branch
+until [ -d .git/ ]; do
+	cd ..
+done
+GIT_CONFIG=`pwd`"/.git/config"
+REMOTE_BRANCH=`cat $GIT_CONFIG | grep --after-context=2 'branch "'$CURRENT_BRANCH | tail -1 | cut --delimiter=/ -f 3`
+REMOTE_NAME=`cat $GIT_CONFIG | grep --after-context=2 'branch "'$CURRENT_BRANCH | tail -2 | head -1 | cut --delimiter== -f 2 | cut -c 2-`
+TRACK=$REMOTE_NAME/$REMOTE_BRANCH
+
+# generate output
+echo "Files changes relative to ${TRACK}:" > $TMP_DIR$TMP_FILE
+git diff $TRACK...$CURRENT_BRANCH --name-status >> $TMP_DIR$TMP_FILE
+
+# render the output
+cat $TMP_DIR$TMP_FILE
+
+# clean up
+rm -rf $TMP_DIR
+cd $OLD_PWD
